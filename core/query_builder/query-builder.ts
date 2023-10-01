@@ -4,11 +4,13 @@ import {
   defaultSelectMap,
 } from "../contants";
 import { DuplicateFromError, DuplicateSelectError } from "../errors";
-import { groupBy } from "../utils";
+import { genVariations, groupBy } from "../utils";
 
 class QueryBuilder {
   // Data to be queried
-  private data?: any[];
+  private data?: any[] | any[][];
+
+  private joinMode: boolean = false;
 
   // Function to map the data to the desired output
   private selectMap?: SelectMap;
@@ -39,17 +41,18 @@ class QueryBuilder {
     return this;
   }
 
-  /**
-   *
-   */
-  // TODO: Add support for multiple data sources
-  public from(data: any[]): QueryBuilder {
+  public from(...data: any[]): QueryBuilder {
     // Check if from() was called before
     if (this.data) {
       throw new DuplicateFromError();
     }
 
-    this.data = data;
+    if (data.length === 1) {
+      this.data = data[0] as any[];
+    } else {
+      this.joinMode = true;
+      this.data = data;
+    }
 
     return this;
   }
@@ -92,17 +95,26 @@ class QueryBuilder {
       return [];
     }
 
-    let result = this.data
-      .filter(this.selectFilter ?? defaultSelectFilter)
-      .sort((a, b) => {
-        return this.selectOrderBy ? -this.selectOrderBy(a, b) : 1;
-      });
+    let result = this.data;
 
-    if (this.selectGroupBy) {
-      for (const groupRule of this.selectGroupBy) {
-        result = groupBy(result, groupRule);
-      }
+    if (this.joinMode) {
+      const res = genVariations(this.data);
+
+      result = res.filter(this.selectFilter ?? defaultSelectFilter);
+    } else {
+      result = result.filter(this.selectFilter ?? defaultSelectFilter);
     }
+
+    result = result.sort((a, b) => {
+      return this.selectOrderBy ? -this.selectOrderBy(a, b) : 1;
+    });
+
+    if (this.data)
+      if (this.selectGroupBy) {
+        for (const groupRule of this.selectGroupBy) {
+          result = groupBy(result, groupRule);
+        }
+      }
 
     result = result
       .map(this.selectMap ?? defaultSelectMap)

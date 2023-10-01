@@ -1,5 +1,17 @@
 import { DuplicateFromError, DuplicateSelectError } from "../core/errors";
 import { query } from "../core/query_builder";
+import {
+  numbers,
+  users,
+  people,
+  professionGroup,
+  parity,
+  odd,
+  student,
+  students,
+  teacherJoin,
+  teachers,
+} from "./test.utils";
 
 describe("SQL tests", () => {
   it("Basic SELECT tests", () => {
@@ -156,46 +168,17 @@ describe("SQL tests", () => {
 
     expect(res).toEqual([9, 8, 7, 6, 5, 4, 3, 2, 1]);
   });
+
+  it("Multiple data sources tests", () => {
+    const res = query()
+      .select(student)
+      .from(teachers, students)
+      .where(teacherJoin)
+      .execute();
+
+    expect(res).toEqual([
+      { studentName: "Michael", teacherName: "Peter" },
+      { studentName: "Rose", teacherName: "Anna" },
+    ]);
+  });
 });
-
-const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-const parity = (num: number) => {
-  return num % 2 === 0 ? "even" : "odd";
-};
-
-const users = [
-  { name: "John", age: 18 },
-  { name: "Jane", age: 21 },
-  { name: "Jack", age: 20 },
-];
-
-const people = [
-  { name: "Jane", age: 21, job: "plumber" },
-  { name: "Jane", age: 21, job: "plumber" },
-  { name: "John", age: 18, job: "teacher" },
-  { name: "Jack", age: 20, job: "teacher" },
-  { name: "John", age: 18, job: "teacher" },
-  { name: "Jack", age: 20, job: "teacher" },
-];
-
-const professionGroup = (group: GroupByArray) => {
-  return group[0];
-};
-
-const isPrime = (num: number) => {
-  if (num < 2) {
-    return false;
-  }
-  var divisor = 2;
-  for (; num % divisor !== 0; divisor++);
-  return divisor === num;
-};
-
-const prime = (num: number) => {
-  return isPrime(num) ? "prime" : "divisible";
-};
-
-const odd = (group: GroupByArray) => {
-  return group[0] === "odd";
-};
