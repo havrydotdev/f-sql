@@ -11,6 +11,7 @@ import {
   students,
   teacherJoin,
   teachers,
+  tutor1,
 } from "./test.utils";
 
 describe("SQL tests", () => {
@@ -180,5 +181,17 @@ describe("SQL tests", () => {
       { studentName: "Michael", teacherName: "Peter" },
       { studentName: "Rose", teacherName: "Anna" },
     ]);
+  });
+
+  it("Test WHERE with AND", () => {
+    const res = query()
+      .select(student)
+      .from(teachers, students)
+      .where(teacherJoin)
+      .where(tutor1)
+      .execute();
+
+    expect(res).toHaveLength(1);
+    expect(res).toEqual([{ studentName: "Michael", teacherName: "Peter" }]);
   });
 });

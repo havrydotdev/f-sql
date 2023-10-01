@@ -70,7 +70,12 @@ const student = (join: [any, any]) => {
   return { studentName: join[1].studentName, teacherName: join[0].teacherName };
 };
 
+function tutor1(join: [any, any]) {
+  return join[1].tutor === "1";
+}
+
 export {
+  tutor1,
   numbers,
   parity,
   users,

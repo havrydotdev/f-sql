@@ -1,10 +1,6 @@
-import {
-  defaultOrderBy,
-  defaultSelectFilter,
-  defaultSelectMap,
-} from "../contants";
+import { defaultSelectMap } from "../constants";
 import { DuplicateFromError, DuplicateSelectError } from "../errors";
-import { genVariations, groupBy } from "../utils";
+import { checkValid, genVariations, groupBy } from "../utils";
 
 class QueryBuilder {
   // Data to be queried
@@ -16,13 +12,13 @@ class QueryBuilder {
   private selectMap?: SelectMap;
 
   // Function to filter the data
-  private selectFilter?: SelectFilter;
+  private selectFilter?: SelectFilter[][];
 
   // Function to group the data
   private selectGroupBy?: SelectGroupBy[];
 
   // Function to filter the grouped data
-  private selectHaving?: SelectHaving;
+  private selectHaving?: SelectHaving[][];
 
   // Function to order the data
   private selectOrderBy?: SelectOrderBy;
@@ -60,9 +56,10 @@ class QueryBuilder {
   /**
    *
    */
-  // TODO: Add support for AND and OR
-  public where(selectFilter: SelectFilter): QueryBuilder {
-    this.selectFilter = selectFilter;
+  public where(...selectFilter: SelectFilter[]): QueryBuilder {
+    if (!this.selectFilter) this.selectFilter = [];
+
+    this.selectFilter?.push(selectFilter);
 
     return this;
   }
@@ -74,8 +71,10 @@ class QueryBuilder {
     return this;
   }
 
-  public having(selectHaving: SelectHaving): QueryBuilder {
-    this.selectHaving = selectHaving;
+  public having(...selectHaving: SelectHaving[]): QueryBuilder {
+    if (!this.selectFilter) this.selectFilter = [];
+
+    this.selectHaving?.push(selectHaving);
 
     return this;
   }
@@ -97,28 +96,33 @@ class QueryBuilder {
 
     let result = this.data;
 
-    if (this.joinMode) {
+    if (this.joinMode && this.selectFilter) {
       const res = genVariations(this.data);
 
-      result = res.filter(this.selectFilter ?? defaultSelectFilter);
-    } else {
-      result = result.filter(this.selectFilter ?? defaultSelectFilter);
+      result = res.filter((item: any[]) =>
+        checkValid(this.selectFilter!, item)
+      );
+    } else if (this.selectFilter) {
+      result = result.filter((item: any[]) =>
+        checkValid(this.selectFilter!, item)
+      );
     }
 
     result = result.sort((a, b) => {
       return this.selectOrderBy ? -this.selectOrderBy(a, b) : 1;
     });
 
-    if (this.data)
-      if (this.selectGroupBy) {
-        for (const groupRule of this.selectGroupBy) {
-          result = groupBy(result, groupRule);
-        }
+    if (this.selectGroupBy) {
+      for (const groupRule of this.selectGroupBy) {
+        result = groupBy(result, groupRule);
       }
+    }
 
-    result = result
-      .map(this.selectMap ?? defaultSelectMap)
-      .filter(this.selectHaving ?? defaultSelectFilter);
+    result = result.map(this.selectMap ?? defaultSelectMap);
+
+    if (this.selectHaving) {
+      result = result.filter((item) => checkValid(this.selectHaving!, item));
+    }
 
     return result;
   }
