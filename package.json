@@ -1,0 +1,30 @@
+{
+  "name": "f-sql",
+  "version": "1.0.0",
+  "description": "Functional SQL implementation in Typescript",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gavrylenkoIvan/f-sql.git"
+  },
+  "keywords": [
+    "sql",
+    "codewars",
+    "functional"
+  ],
+  "author": "Havrylenko Ivan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gavrylenkoIvan/f-sql/issues"
+  },
+  "homepage": "https://github.com/gavrylenkoIvan/f-sql#readme",
+  "devDependencies": {
+    "@types/jest": "^29.5.5",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
+  }
+}
