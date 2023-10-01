@@ -1,5 +1,14 @@
-const defaultSelectMap = (entity: any) => entity;
+const defaultSelectMap: SelectMap = (entity: any) => entity;
 
-const defaultSelectFilter = (entity: any) => true;
+const defaultSelectFilter: SelectFilter = (entity: any) => true;
 
-export { defaultSelectMap, defaultSelectFilter };
+const defaultHavingFilter = defaultSelectFilter;
+
+const defaultOrderBy: SelectOrderBy = (entity: any) => 1;
+
+export {
+  defaultSelectMap,
+  defaultSelectFilter,
+  defaultHavingFilter,
+  defaultOrderBy,
+};

@@ -1,4 +1,8 @@
-import { defaultSelectFilter, defaultSelectMap } from "../contants";
+import {
+  defaultOrderBy,
+  defaultSelectFilter,
+  defaultSelectMap,
+} from "../contants";
 import { DuplicateFromError, DuplicateSelectError } from "../errors";
 import { groupBy } from "../utils";
 
@@ -13,7 +17,13 @@ class QueryBuilder {
   private selectFilter?: SelectFilter;
 
   // Function to group the data
-  private selectGroupBy?: SelectGroupBy;
+  private selectGroupBy?: SelectGroupBy[];
+
+  // Function to filter the grouped data
+  private selectHaving?: SelectHaving;
+
+  // Function to order the data
+  private selectOrderBy?: SelectOrderBy;
 
   /**
    *
@@ -32,6 +42,7 @@ class QueryBuilder {
   /**
    *
    */
+  // TODO: Add support for multiple data sources
   public from(data: any[]): QueryBuilder {
     // Check if from() was called before
     if (this.data) {
@@ -46,17 +57,28 @@ class QueryBuilder {
   /**
    *
    */
+  // TODO: Add support for AND and OR
   public where(selectFilter: SelectFilter): QueryBuilder {
     this.selectFilter = selectFilter;
 
     return this;
   }
 
-  /**
-   *
-   */
-  public groupBy(selectGroupBy: SelectGroupBy): QueryBuilder {
+  // TODO: Multilevel group by
+  public groupBy(...selectGroupBy: SelectGroupBy[]): QueryBuilder {
     this.selectGroupBy = selectGroupBy;
+
+    return this;
+  }
+
+  public having(selectHaving: SelectHaving): QueryBuilder {
+    this.selectHaving = selectHaving;
+
+    return this;
+  }
+
+  public orderBy(selectOrderBy: SelectOrderBy): QueryBuilder {
+    this.selectOrderBy = selectOrderBy;
 
     return this;
   }
@@ -70,13 +92,21 @@ class QueryBuilder {
       return [];
     }
 
-    let result = this.data.filter(this.selectFilter ?? defaultSelectFilter);
+    let result = this.data
+      .filter(this.selectFilter ?? defaultSelectFilter)
+      .sort((a, b) => {
+        return this.selectOrderBy ? -this.selectOrderBy(a, b) : 1;
+      });
 
     if (this.selectGroupBy) {
-      result = groupBy(result, this.selectGroupBy);
+      for (const groupRule of this.selectGroupBy) {
+        result = groupBy(result, groupRule);
+      }
     }
 
-    result = result.map(this.selectMap ?? defaultSelectMap);
+    result = result
+      .map(this.selectMap ?? defaultSelectMap)
+      .filter(this.selectHaving ?? defaultSelectFilter);
 
     return result;
   }
