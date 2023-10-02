@@ -1,5 +1,9 @@
-import { defaultSelectMap } from "../constants";
-import { DuplicateFromError, DuplicateSelectError } from "../errors";
+import {
+  DuplicateFromError,
+  DuplicateSelectError,
+  DuplicateOrderByError,
+  DuplicateGroupByError,
+} from "../errors";
 import { checkValid, genVariations, groupBy } from "../utils";
 
 class QueryBuilder {
@@ -12,13 +16,13 @@ class QueryBuilder {
   private selectMap?: SelectMap;
 
   // Function to filter the data
-  private selectFilter?: SelectFilter[][];
+  private selectFilter: SelectFilter[][] = [];
 
   // Function to group the data
   private selectGroupBy?: SelectGroupBy[];
 
   // Function to filter the grouped data
-  private selectHaving?: SelectHaving[][];
+  private selectHaving: SelectHaving[][] = [];
 
   // Function to order the data
   private selectOrderBy?: SelectOrderBy;
@@ -28,20 +32,16 @@ class QueryBuilder {
    */
   public select(selectMap?: SelectMap): QueryBuilder {
     // Check if select() was called before
-    if (this.selectMap) {
-      throw new DuplicateSelectError();
-    }
+    if (this.selectMap) throw new DuplicateSelectError();
 
-    this.selectMap = selectMap ?? defaultSelectMap;
+    this.selectMap = selectMap;
 
     return this;
   }
 
   public from(...data: any[]): QueryBuilder {
     // Check if from() was called before
-    if (this.data) {
-      throw new DuplicateFromError();
-    }
+    if (this.data) throw new DuplicateFromError();
 
     if (data.length === 1) {
       this.data = data[0] as any[];
@@ -57,29 +57,28 @@ class QueryBuilder {
    *
    */
   public where(...selectFilter: SelectFilter[]): QueryBuilder {
-    if (!this.selectFilter) this.selectFilter = [];
-
-    this.selectFilter?.push(selectFilter);
+    this.selectFilter.push(selectFilter);
 
     return this;
   }
 
-  // TODO: Multilevel group by
   public groupBy(...selectGroupBy: SelectGroupBy[]): QueryBuilder {
+    if (this.selectGroupBy) throw new DuplicateGroupByError();
+
     this.selectGroupBy = selectGroupBy;
 
     return this;
   }
 
   public having(...selectHaving: SelectHaving[]): QueryBuilder {
-    if (!this.selectFilter) this.selectFilter = [];
-
-    this.selectHaving?.push(selectHaving);
+    this.selectHaving.push(selectHaving);
 
     return this;
   }
 
   public orderBy(selectOrderBy: SelectOrderBy): QueryBuilder {
+    if (this.selectOrderBy) throw new DuplicateOrderByError();
+
     this.selectOrderBy = selectOrderBy;
 
     return this;
@@ -96,29 +95,27 @@ class QueryBuilder {
 
     let result = this.data;
 
-    if (this.joinMode && this.selectFilter) {
-      const res = genVariations(this.data);
+    if (this.joinMode) {
+      result = genVariations(result);
+    }
 
-      result = res.filter((item: any[]) =>
-        checkValid(this.selectFilter!, item)
-      );
-    } else if (this.selectFilter) {
-      result = result.filter((item: any[]) =>
+    if (this.selectOrderBy) {
+      result.sort((a, b) => this.selectOrderBy!(a, b));
+    }
+
+    if (this.selectFilter) {
+      result = result.filter((item: any) =>
         checkValid(this.selectFilter!, item)
       );
     }
-
-    result = result.sort((a, b) => {
-      return this.selectOrderBy ? -this.selectOrderBy(a, b) : 1;
-    });
 
     if (this.selectGroupBy) {
-      for (const groupRule of this.selectGroupBy) {
-        result = groupBy(result, groupRule);
-      }
+      result = groupBy(result, ...this.selectGroupBy.slice());
     }
 
-    result = result.map(this.selectMap ?? defaultSelectMap);
+    if (this.selectMap) {
+      result = result.map(this.selectMap);
+    }
 
     if (this.selectHaving) {
       result = result.filter((item) => checkValid(this.selectHaving!, item));

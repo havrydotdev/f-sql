@@ -8,4 +8,4 @@ type SelectGroupBy = SelectMap;
 
 type SelectOrderBy = (a: any, b: any) => number;
 
-type GroupByArray = [string, any[]];
+type GroupByArray = [string | number, any[]];

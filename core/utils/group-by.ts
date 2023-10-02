@@ -1,18 +1,25 @@
-const groupBy = (data: any[], groupKey: SelectGroupBy): GroupByArray[] => {
-  const grouped: GroupByArray[] = [];
+const groupBy = (executeData: any[], ...groupByFns: any[]): any => {
+  if (!groupByFns.length) {
+    return executeData;
+  }
 
-  data.forEach((entity) => {
-    const key = groupKey(entity);
-    const group = grouped.find((group) => group[0] === key);
+  const groupByFn = groupByFns.shift();
+  const groupTypes: any = {};
 
-    if (group) {
-      group[1].push(entity);
-    } else {
-      grouped.push([key, [entity]]);
-    }
+  const grouped = executeData.reduce((grouped, item) => {
+    const key = groupByFn!(item);
+    groupTypes[key] = typeof key;
+    grouped[key] = grouped[key] || [];
+    grouped[key].push(item);
+    return grouped;
+  }, {});
+
+  return Object.entries(grouped).map(([groupName, values]) => {
+    return [
+      groupTypes[groupName] === "number" ? parseInt(groupName) : groupName,
+      groupBy(values as any[], ...groupByFns.slice()),
+    ];
   });
-
-  return grouped;
 };
 
 export { groupBy };

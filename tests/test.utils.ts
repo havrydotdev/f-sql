@@ -19,6 +19,51 @@ const people = [
   { name: "Jack", age: 20, job: "teacher" },
 ];
 
+const persons = [
+  {
+    name: "Peter",
+    profession: "teacher",
+    age: 20,
+    maritalStatus: "married",
+  },
+  {
+    name: "Michael",
+    profession: "teacher",
+    age: 50,
+    maritalStatus: "single",
+  },
+  {
+    name: "Peter",
+    profession: "teacher",
+    age: 20,
+    maritalStatus: "married",
+  },
+  {
+    name: "Anna",
+    profession: "scientific",
+    age: 20,
+    maritalStatus: "married",
+  },
+  {
+    name: "Rose",
+    profession: "scientific",
+    age: 50,
+    maritalStatus: "married",
+  },
+  {
+    name: "Anna",
+    profession: "scientific",
+    age: 20,
+    maritalStatus: "single",
+  },
+  {
+    name: "Anna",
+    profession: "politician",
+    age: 50,
+    maritalStatus: "married",
+  },
+];
+
 const professionGroup = (group: GroupByArray) => {
   return group[0];
 };
@@ -74,7 +119,195 @@ function tutor1(join: [any, any]) {
   return join[1].tutor === "1";
 }
 
+function lessThan3(number: number) {
+  return number < 3;
+}
+
+function greaterThan4(number: number) {
+  return number > 4;
+}
+
+function profession(person: any) {
+  return person.profession;
+}
+
+function name(person: any) {
+  return person.name;
+}
+
+function age(person: any) {
+  return person.age;
+}
+
+function maritalStatus(person: any) {
+  return person.maritalStatus;
+}
+
+function professionCount(group: any) {
+  return [group[0], group[1].length];
+}
+
+function naturalCompare(value1: any, value2: any) {
+  if (value1 < value2) {
+    return -1;
+  } else if (value1 > value2) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+const multilevelRes = [
+  [
+    "teacher",
+    [
+      [
+        "Peter",
+        [
+          [
+            20,
+            [
+              [
+                "married",
+                [
+                  {
+                    name: "Peter",
+                    profession: "teacher",
+                    age: 20,
+                    maritalStatus: "married",
+                  },
+                  {
+                    name: "Peter",
+                    profession: "teacher",
+                    age: 20,
+                    maritalStatus: "married",
+                  },
+                ],
+              ],
+            ],
+          ],
+        ],
+      ],
+      [
+        "Michael",
+        [
+          [
+            50,
+            [
+              [
+                "single",
+                [
+                  {
+                    name: "Michael",
+                    profession: "teacher",
+                    age: 50,
+                    maritalStatus: "single",
+                  },
+                ],
+              ],
+            ],
+          ],
+        ],
+      ],
+    ],
+  ],
+  [
+    "scientific",
+    [
+      [
+        "Anna",
+        [
+          [
+            20,
+            [
+              [
+                "married",
+                [
+                  {
+                    name: "Anna",
+                    profession: "scientific",
+                    age: 20,
+                    maritalStatus: "married",
+                  },
+                ],
+              ],
+              [
+                "single",
+                [
+                  {
+                    name: "Anna",
+                    profession: "scientific",
+                    age: 20,
+                    maritalStatus: "single",
+                  },
+                ],
+              ],
+            ],
+          ],
+        ],
+      ],
+      [
+        "Rose",
+        [
+          [
+            50,
+            [
+              [
+                "married",
+                [
+                  {
+                    name: "Rose",
+                    profession: "scientific",
+                    age: 50,
+                    maritalStatus: "married",
+                  },
+                ],
+              ],
+            ],
+          ],
+        ],
+      ],
+    ],
+  ],
+  [
+    "politician",
+    [
+      [
+        "Anna",
+        [
+          [
+            50,
+            [
+              [
+                "married",
+                [
+                  {
+                    name: "Anna",
+                    profession: "politician",
+                    age: 50,
+                    maritalStatus: "married",
+                  },
+                ],
+              ],
+            ],
+          ],
+        ],
+      ],
+    ],
+  ],
+];
+
 export {
+  multilevelRes,
+  naturalCompare,
+  professionCount,
+  age,
+  maritalStatus,
+  name,
+  profession,
+  persons,
+  lessThan3,
+  greaterThan4,
   tutor1,
   numbers,
   parity,

@@ -12,6 +12,16 @@ import {
   teacherJoin,
   teachers,
   tutor1,
+  greaterThan4,
+  lessThan3,
+  persons,
+  name,
+  profession,
+  age,
+  maritalStatus,
+  professionCount,
+  multilevelRes,
+  naturalCompare,
 } from "./test.utils";
 
 describe("SQL tests", () => {
@@ -43,6 +53,53 @@ describe("SQL tests", () => {
     } catch (e) {
       expect(e).toBeInstanceOf(DuplicateSelectError);
     }
+  });
+
+  it("Numbers tests", () => {
+    const res = query()
+      .select()
+      .from(numbers)
+      .where(lessThan3, greaterThan4)
+      .execute();
+
+    expect(res).toEqual([1, 2, 5, 6, 7, 8, 9]);
+  });
+
+  it("Multilevel GROUPBY tests", () => {
+    const res = query()
+      .select()
+      .from(persons)
+      .groupBy(profession, name, age, maritalStatus)
+      .execute();
+
+    const res2 = query()
+      .select(professionCount)
+      .from(persons)
+      .groupBy(profession)
+      .execute();
+
+    const res3 = query()
+      .select(professionCount)
+      .from(persons)
+      .groupBy(profession)
+      .orderBy(naturalCompare)
+      .execute();
+
+    console.log(JSON.stringify(res3));
+
+    expect(res).toEqual(multilevelRes);
+
+    expect(res2).toEqual([
+      ["teacher", 3],
+      ["scientific", 3],
+      ["politician", 1],
+    ]);
+
+    expect(res3).toEqual([
+      ["politician", 1],
+      ["scientific", 3],
+      ["teacher", 3],
+    ]);
   });
 
   it("Duplicate FROM tests", () => {
@@ -126,28 +183,6 @@ describe("SQL tests", () => {
     ]);
   });
 
-  // TODO
-  // it("Multilevel GROUP BY tests", () => {
-  //   const res = query().select().from(numbers).groupBy(parity, prime).execute();
-
-  //   expect(res).toEqual([
-  //     [
-  //       "odd",
-  //       [
-  //         ["divisible", [1, 9]],
-  //         ["prime", [3, 5, 7]],
-  //       ],
-  //     ],
-  //     [
-  //       "even",
-  //       [
-  //         ["prime", [2]],
-  //         ["divisible", [4, 6, 8]],
-  //       ],
-  //     ],
-  //   ]);
-  // });
-
   it("Basic HAVING tests", () => {
     const res = query()
       .select()
@@ -164,7 +199,7 @@ describe("SQL tests", () => {
     const res = query()
       .select()
       .from(numbers)
-      .orderBy((num1, num2) => num1 - num2)
+      .orderBy((num1, num2) => num2 - num1)
       .execute();
 
     expect(res).toEqual([9, 8, 7, 6, 5, 4, 3, 2, 1]);
