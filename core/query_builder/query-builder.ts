@@ -99,11 +99,7 @@ class QueryBuilder {
       result = genVariations(result);
     }
 
-    if (this.selectOrderBy) {
-      result.sort((a, b) => this.selectOrderBy!(a, b));
-    }
-
-    if (this.selectFilter) {
+    if (this.selectFilter.length > 0) {
       result = result.filter((item: any) =>
         checkValid(this.selectFilter!, item)
       );
@@ -113,12 +109,16 @@ class QueryBuilder {
       result = groupBy(result, ...this.selectGroupBy.slice());
     }
 
+    if (this.selectHaving) {
+      result = result.filter((item) => checkValid(this.selectHaving!, item));
+    }
+
     if (this.selectMap) {
       result = result.map(this.selectMap);
     }
 
-    if (this.selectHaving) {
-      result = result.filter((item) => checkValid(this.selectHaving!, item));
+    if (this.selectOrderBy) {
+      result.sort((a, b) => this.selectOrderBy!(a, b));
     }
 
     return result;

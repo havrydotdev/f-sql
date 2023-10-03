@@ -157,6 +157,26 @@ function naturalCompare(value1: any, value2: any) {
   }
 }
 
+function greatThan1(group: any) {
+  console.log(group);
+  return group[1].length > 1;
+}
+
+function isPair(group: any) {
+  return group[0] % 2 === 0;
+}
+
+function frequency(group: any) {
+  return {
+    value: group[0],
+    frequency: group[1].length,
+  };
+}
+
+function id(value: any) {
+  return value;
+}
+
 const multilevelRes = [
   [
     "teacher",
@@ -298,6 +318,10 @@ const multilevelRes = [
 ];
 
 export {
+  greatThan1,
+  isPair,
+  frequency,
+  id,
   multilevelRes,
   naturalCompare,
   professionCount,

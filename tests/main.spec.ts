@@ -22,6 +22,10 @@ import {
   professionCount,
   multilevelRes,
   naturalCompare,
+  frequency,
+  greatThan1,
+  id,
+  isPair,
 } from "./test.utils";
 
 describe("SQL tests", () => {
@@ -99,6 +103,28 @@ describe("SQL tests", () => {
       ["politician", 1],
       ["scientific", 3],
       ["teacher", 3],
+    ]);
+  });
+
+  it("Frequency tests", () => {
+    const nums = [1, 2, 1, 3, 5, 6, 1, 2, 5, 6];
+    const res = query()
+      .select(frequency)
+      .from(nums)
+      .groupBy(id)
+      .having(greatThan1)
+      .having(isPair)
+      .execute();
+
+    expect(res).toEqual([
+      {
+        value: 2,
+        frequency: 2,
+      },
+      {
+        value: 6,
+        frequency: 2,
+      },
     ]);
   });
 
